@@ -1,0 +1,29 @@
+apiVersion: v1  # versão da API do Kubernetes para recursos core (Pod)
+kind: Pod  # tipo do recurso: Pod
+metadata:  # metadados que identificam o objeto (nome, labels, annotations)
+  name: pod-licao  # nome único do Pod no namespace
+  labels:  # rótulos para seleção/organização (úteis em selectors e serviços)
+     run: licao  # rótulo chave=valor usado para identificar/selecionar esse Pod
+spec:  # especificação desejada do Pod (o que queremos que rode)
+  containers:  # lista de containers que compõem este Pod
+    - name: nginx  # nome do container dentro do Pod (referência local)
+      image: nginx:latest  # imagem do container (repositório:tag)
+      ports:  # portas que o container declara/expõe  
+        - containerPort: 80  # porta interna do container (apontada para serviços)
+      volumeMounts:  # montagem de volumes no container
+        - mountPath: /usr/share/nginx/html  # caminho dentro do container onde o volume será montado
+          name: html-volume  # nome do volume a ser montado
+      resources:  # requests/limits de CPU/memória
+        requests:  # requests de recursos para o container
+          memory: "128Mi"  # request de memória (128 MiB)
+          cpu: "0.5"  # request de CPU (500 millicores)
+        limits:  # limites de recursos para o container
+          memory: "256Mi"  # limite de memória (256 MiB)
+          cpu: "1"  # limite de CPU (1 core)
+  dnsPolicy: ClusterFirst  # política de resolução DNS para o Pod
+  restartPolicy: Always  # quando reiniciar containers (Always/Never/OnFailure)
+  volumes:  # definição de volumes para o Pod
+    - name: html-volume  # nome do volume
+      emptyDir: {}  # tipo de volume (emptyDir = volume temporário em disco)
+status: {}  # campo de status (preenchido pelo kubelet/servidor apiserver)  
+

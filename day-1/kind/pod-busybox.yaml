@@ -1,0 +1,11 @@
+apiVersion: v1  # versão da API Kubernetes para recursos core (Pod)
+kind: Pod  # tipo de recurso
+metadata:  # metadados que identificam o objeto (nome, labels, annotations)
+  name: pod-busybox  # nome do Pod no namespace atual
+spec:  # especificação do que deve rodar no Pod
+  containers:  # lista de containers que compõem o Pod
+    - name: busybox  # nome do container dentro do Pod
+      image: busybox  # imagem do container (repositório:tag)
+      command: ["sh", "-c", "echo Hello Kubernetes && sleep 3600"]  # comando/entrada que o container executa ao iniciar
+      stdin: true  # mantém stdin aberto (útil para `kubectl exec -it`/entrada interativa)
+      tty: true  # aloca um TTY para permitir sessões interativas

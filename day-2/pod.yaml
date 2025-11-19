@@ -1,0 +1,21 @@
+apiVersion: v1  # versão da API Kubernetes para objetos core (Pods)
+kind: Pod  # tipo de recurso
+metadata:  # metadados que identificam o objeto
+  labels:  # rótulos do Pod (úteis para seleção e agrupamento)
+    run: wisomar  # rótulo chave=valor
+  name: wisomar  # nome do Pod
+spec:  # especificação desejada do Pod (o que queremos executar)
+  containers:  # lista de containers que compõem o Pod
+  - image: nginx  # imagem do container (ex: nginx:latest)
+    name: nginx  # nome do container dentro do Pod
+  - image: busybox  # segunda imagem no mesmo Pod
+    name: busybox  # nome do segundo container
+    args:  # argumentos passados para o processo do container (substitui CMD)
+    - sleep  # comando/argumento 1
+    - "600"  # comando/argumento 2 (string, aqui é tempo em segundos)
+    resources: {}  # requests/limits de CPU/memória (vazio = não definido)
+  dnsPolicy: ClusterFirst  # política de resolução DNS para o Pod
+  restartPolicy: Always  # quando reiniciar containers (Always/Never/OnFailure)
+status: {}  # campo de status (preenchido pelo kubelet/servidor apiserver)
+
+
