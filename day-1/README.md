@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ### **DAY-1 – Fundamentos, Containers, OCI, Kubernetes e Primeiro Cluster**
 
 ---
@@ -442,3 +443,6 @@ Este dia é **absolutamente fundamental** para tudo o que vem depois.
 **#VAIIII 🚀🔥**
 
 
+=======
+# Descomplicando_kubernetes
+>>>>>>> 0d01d9978809450b2b7d9796480de4e420ccd412
