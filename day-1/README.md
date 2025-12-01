@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 ### **DAY-1 – Fundamentos, Containers, OCI, Kubernetes e Primeiro Cluster**
 
 ---
