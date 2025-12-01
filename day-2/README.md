@@ -1,3 +1,345 @@
+
+# Descomplicando o Kubernetes - Expert Mode
+
+## **DAY-2 - Trabalhando com Pods**
+
+---
+
+## 📚 **Índice**
+
+1. [O que iremos ver hoje?](#o-que-iremos-ver-hoje)
+2. [O que é um Pod?](#o-que-é-um-pod)
+3. [Criando um Pod](#criando-um-pod)
+4. [Criando um Pod via YAML](#criando-um-pod-através-de-um-arquivo-yaml)
+5. [Pod com múltiplos containers](#criando-um-pod-com-mais-de-um-container)
+6. [Containers com limites de CPU e memória](#criando-um-container-com-limites-de-memória-e-cpu)
+7. [Testando limites com stress](#testando-os-limites)
+8. [Volume EmptyDir](#adicionando-um-volume-emptydir-no-pod)
+
+---
+
+## 🧠 **O que iremos ver hoje?**
+
+Hoje vamos nos aprofundar no menor objeto do Kubernetes: o **Pod**.
+
+Você aprenderá:
+✔ O que é um Pod
+✔ Criar Pods por comando e por YAML
+✔ Pods com múltiplos containers
+✔ Definir limites de CPU e memória
+✔ Utilizar volumes do tipo EmptyDir
+✔ Ver detalhes, logs, descrever Pods e interagir com containers
+
+---
+
+## 📦 **O que é um Pod?**
+
+O **Pod é a menor unidade do Kubernetes**.
+
+Ele funciona como uma "caixinha" que contém **um ou mais containers**, que compartilham:
+
+* IP
+* Namespaces
+* Volumes
+* Recursos
+
+Sempre pense: **um Pod = um ou mais containers que compartilham recursos**.
+
+---
+
+## 🚀 **Criando um Pod**
+
+Existem duas formas principais:
+
+### ➤ **1. Via comando**
+
+```bash
+kubectl run giropops --image=nginx --port=80
+```
+
+### Ver Pods:
+
+```bash
+kubectl get pods
+kubectl get pods -A
+kubectl get pods -n <namespace>
+```
+
+### Mais detalhes:
+
+```bash
+kubectl get pod giropops -o yaml
+kubectl get pod giropops -o json
+kubectl get pod giropops -o wide
+kubectl describe pod giropops
+```
+
+### Remover:
+
+```bash
+kubectl delete pod giropops
+```
+
+---
+
+## 📄 **Criando um Pod através de um arquivo YAML**
+
+Arquivo: `pod.yaml`
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: giropops
+  labels:
+    run: giropops
+spec:
+  containers:
+  - name: giropops
+    image: nginx
+    ports:
+    - containerPort: 80
+```
+
+Criar o Pod:
+
+```bash
+kubectl apply -f pod.yaml
+```
+
+Ver logs:
+
+```bash
+kubectl logs giropops
+kubectl logs -f giropops
+```
+
+Excluir:
+
+```bash
+kubectl delete pod giropops
+```
+
+---
+
+## 🧩 **Criando um Pod com mais de um container**
+
+Arquivo: `pod-multi-container.yaml`
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: giropops
+  labels:
+    run: giropops
+spec:
+  containers:
+  - name: girus
+    image: nginx
+    ports:
+    - containerPort: 80
+  - name: strigus
+    image: alpine
+    args:
+    - sleep
+    - "1800"
+```
+
+Criar:
+
+```bash
+kubectl apply -f pod-multi-container.yaml
+```
+
+### Interagir com containers
+
+**attach (sem iniciar processo novo):**
+
+```bash
+kubectl attach giropops -c strigus
+```
+
+**exec (criando um processo dentro do container):**
+
+```bash
+kubectl exec giropops -c strigus -- ls
+kubectl exec giropops -c strigus -it -- sh
+kubectl exec giropops -c girus -it -- sh
+```
+
+---
+
+## 🧮 **Criando um container com limites de memória e CPU**
+
+Arquivo: `pod-limitado.yaml`
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: giropops
+  labels:
+    run: giropops
+spec:
+  containers:
+  - name: girus
+    image: nginx
+    ports:
+    - containerPort: 80
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "0.5"
+      requests:
+        memory: "64Mi"
+        cpu: "0.3"
+```
+
+Criar:
+
+```bash
+kubectl create -f pod-limitado.yaml
+```
+
+Ver detalhes:
+
+```bash
+kubectl describe pod giropops
+```
+
+---
+
+## 🧪 **Testando os limites**
+
+Criar Pod Ubuntu para testes:
+
+Arquivo: `pod-ubuntu-limitado.yaml`
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: giropops
+spec:
+  containers:
+  - name: girus
+    image: ubuntu
+    args:
+    - sleep
+    - infinity
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "0.5"
+      requests:
+        memory: "64Mi"
+        cpu: "0.3"
+```
+
+Criar:
+
+```bash
+kubectl create -f pod-ubuntu-limitado.yaml
+```
+
+Entrar no container:
+
+```bash
+kubectl exec -it giropops -- bash
+```
+
+Instalar stress:
+
+```bash
+apt update
+apt install -y stress
+```
+
+Testes:
+
+```bash
+stress --vm 1 --vm-bytes 100M
+stress --vm 1 --vm-bytes 200M   # deve falhar
+```
+
+---
+
+## 📁 **Adicionando um volume EmptyDir no Pod**
+
+Arquivo: `pod-emptydir.yaml`
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: giropops
+spec:
+  containers:
+  - name: girus
+    image: ubuntu
+    args:
+    - sleep
+    - infinity
+    volumeMounts:
+    - name: primeiro-emptydir
+      mountPath: /giropops
+  volumes:
+  - name: primeiro-emptydir
+    emptyDir:
+      SizeLimit: 256Mi
+```
+
+Criar:
+
+```bash
+kubectl create -f pod-emptydir.yaml
+```
+
+Entrar no container:
+
+```bash
+kubectl exec -it giropops -- bash
+```
+
+Criar arquivo:
+
+```bash
+touch /giropops/FUNCIONAAAAAA
+```
+
+Ver montagens:
+
+```bash
+mount
+```
+
+---
+
+## 🎉 **Conclusão**
+
+Agora você domina tudo relacionado a Pods:
+✔ Criação
+✔ Logs
+✔ Describe
+✔ Exec e attach
+✔ Múltiplos containers
+✔ Limites de CPU/memória
+✔ Volumes EmptyDir
+
+Essa base é **fundamental** para seguir no restante da trilha Kubernetes Expert Mode.
+
+---
+
+### 🔗 Documentações recomendadas
+
+* Kubernetes Pods: [https://kubernetes.io/docs/concepts/workloads/pods/](https://kubernetes.io/docs/concepts/workloads/pods/)
+* YAML Kubernetes: [https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/](https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/)
+* Kubectl Reference: [https://kubernetes.io/docs/reference/kubectl/](https://kubernetes.io/docs/reference/kubectl/)
+* Recursos e Limits: [https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/](https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/)
+
+
+
 # Comandos Básicos Kubernetes
 
 Este documento contém uma coleção de comandos essenciais do `kubectl` para gerenciamento e troubleshooting de clusters Kubernetes.
@@ -170,3 +512,5 @@ Permite visualizar os logs de um contêiner específico dentro de um pod com mú
 ---
 
 **Nota:** Substitua `<NOME_DO_POD>`, `<NAMESPACE>`, `<NOME_DO_CONTAINER>` e outros placeholders pelos valores reais do seu ambiente.
+
+
