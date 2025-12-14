@@ -1,0 +1,27 @@
+apiVersion: apps/v1 # Define a versão da API para o Deployment
+kind: Deployment # Define o tipo do recurso como Deployment
+metadata: # Metadados do Deployment
+  labels: # Rótulos para identificar o Deployment
+    app: nginx-deployment
+  name: nginx-deployment # Nome do Deployment
+spec: # Especificações do Deployment
+  replicas: 3 # Número de réplicas (Pods) desejadas
+  selector: # Seletor para identificar os Pods gerenciados por este Deployment
+    matchLabels:
+      app: nginx-deployment
+  strategy: {} # Estratégia de atualização (padrão)
+  template: # Template para os Pods gerenciados por este Deployment
+    metadata: # Metadados dos Pods
+      labels: # Rótulos para os Pods
+        app: nginx-deployment
+    spec: # Especificações dos Pods
+      containers: # Lista de contêineres no Pod
+      - image: nginx:1.19.2 # Imagem do contêiner (Nginx versão 1.7.9)
+        name: nginx # Nome do contêiner
+        resources: # Recursos (CPU/memória) alocados para o contêiner (padrão)
+          limits: # Limites de recursos (nenhum definido)
+            cpu: "0.5" # Limite de CPU
+            memory: 256Mi # Limite de memória
+          requests: # Requisições de recursos (nenhum definido)
+            cpu: "0.25" # Requisição de CPU
+            memory: 128Mi # Requisição de memória

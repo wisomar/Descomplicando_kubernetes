@@ -1,0 +1,26 @@
+apiVersion: apps/v1 # Define a versão da API para o ReplicaSet
+kind: ReplicaSet # Define o tipo do recurso como ReplicaSet
+metadata: # Metadados do ReplicaSet
+  labels: # Rótulos para identificar o ReplicaSet
+    app: nginx-app # Rótulo para o aplicativo nginx
+  name: nginx-replicaset # Nome do ReplicaSet
+spec: # Especificações do ReplicaSet
+  replicas: 3 # Número de réplicas (Pods) desejadas
+  selector: # Seletor para identificar os Pods gerenciados por este ReplicaSet
+    matchLabels: # Rótulo para o aplicativo nginx
+      app: nginx-app # Rótulo para o aplicativo nginx
+  template: # Template para os Pods gerenciados por este ReplicaSet
+    metadata: # Metadados dos Pods
+      labels: # Rótulos para os Pods
+        app: nginx-app # Rótulo para o aplicativo nginx
+    spec: # Especificações dos Pods
+      containers: # Lista de contêineres no Pod
+      - name: nginx-container # Nome do contêiner
+        image: nginx:1.19.2 # Imagem do contêiner (Nginx versão 1.19.2)
+        resources: # Recursos (CPU/memória) alocados para o contêiner
+          limits: # Limites de recursos
+            cpu: "0.5" # Limite de CPU
+            memory: 256Mi # Limite de memória
+          requests: # Requisições de recursos
+            cpu: "0.25" # Requisição de CPU
+            memory: 128Mi # Requisição de memória

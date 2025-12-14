@@ -1,0 +1,36 @@
+apiVersion: apps/v1 # esta linha especifica a versao da API do Kubernetes que estamos usando
+kind: DaemonSet # esta linha indica que estamos criando um DaemonSet
+metadata: # metadados do DaemonSet
+  labels: # rótulos associados ao DaemonSet
+    app: node-exporter # rótulo "app" com valor "node-exporter"
+  name: node-exporter # nome do DaemonSet
+spec: # especificações do DaemonSet
+  selector: # seletor para identificar os Pods gerenciados por este DaemonSet
+    matchLabels: # rótulos que os Pods devem ter para serem gerenciados por este DaemonSet
+      app: node-exporter # rótulo "app" com valor "node-exporter"
+  template: # modelo para os Pods que serão criados
+    metadata: # metadados dos Pods
+      labels: # rótulos associados aos Pods
+        app: node-exporter # rótulo "app" com valor "node-exporter"
+    spec: # especificações dos Pods
+      hostNetwork: true # permite que os Pods usem a rede do nó hospedeiro
+      containers: # lista de contêineres dentro dos Pods
+      - name: node-exporter # nome do contêiner
+        image: prom/node-exporter:latest # imagem do contêiner
+        ports: # portas expostas pelo contêiner
+        - containerPort: 9100 # porta 9100 para o Node Exporter
+          hostPort: 9100 # mapeia a porta 9100 do contêiner para a porta 9100 do nó hospedeiro
+        volumeMounts: # volumes montados no contêiner
+        - name: proc # monta o volume "proc"
+          mountPath: /host/proc # caminho de montagem no contêiner
+          readOnly: true # monta o volume como somente leitura
+        - name: sys # monta o volume "sys"
+          mountPath: /host/sys # caminho de montagem no contêiner
+          readOnly: true # monta o volume como somente leitura
+      volumes: # volumes disponíveis para os contêineres
+      - name: proc # volume "proc"
+        hostPath: # especifica que o volume é um hostPath
+          path: /proc # caminho no nó hospedeiro
+      - name: sys # volume "sys"
+        hostPath: # especifica que o volume é um hostPath
+          path: /sys # caminho no nó hospedeiro

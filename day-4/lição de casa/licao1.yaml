@@ -1,0 +1,50 @@
+apiVersion: apps/v1 # Define a versão da API para o recurso Deployment
+kind: ReplicaSet # Define o tipo de recurso como ReplicaSet
+metadata:
+  name: nginx-replicaset # Nome do ReplicaSet
+  labels: # Rótulos para o ReplicaSet
+    app: nginx # Rótulo para identificar o aplicativo
+spec: # Especificações do ReplicaSet
+  replicas: 3 # Número desejado de réplicas
+  selector: # Seletor para identificar os Pods gerenciados pelo ReplicaSet
+    matchLabels: # Rótulos que os Pods devem ter para serem gerenciados por este ReplicaSet
+      app: nginx # Deve corresponder ao rótulo dos Pods
+  template: # Template para os Pods gerenciados pelo ReplicaSet
+    metadata:
+      labels:
+        app: nginx # Rótulo para os Pods
+    spec:
+      containers: # Definição dos contêineres dentro dos Pods
+      - name: nginx # Nome do contêiner
+        image: nginx:latest # Imagem do contêiner a ser usada
+        ports:
+        - containerPort: 80 # Porta exposta pelo contêiner
+        resources: # Recursos solicitados e limites para o contêiner
+          requests:
+            memory: "64Mi" # Memória solicitada
+            cpu: "250m" # CPU solicitada
+          limits:
+            memory: "128Mi" # Limite máximo de memória
+            cpu: "500m" # Limite máximo de CPU
+        livenessProbe: # Configuração da sonda de vivacidade
+          httpGet: # Tipo de sonda HTTP
+            path: / # Caminho a ser verificado
+            port: 80 # Porta a ser verificada
+          initialDelaySeconds: 10 # Tempo de espera antes de iniciar a sonda
+          periodSeconds: 10 # Frequência da sonda
+        readinessProbe: # Configuração da sonda de prontidão
+          httpGet: # Tipo de sonda HTTP
+            path: / # Caminho a ser verificado
+            port: 80 # Porta a ser verificada
+          initialDelaySeconds: 5 # Tempo de espera antes de iniciar a sonda
+          periodSeconds: 5 # Frequência da sonda
+
+
+
+##### o replicaset não recria os pods quando você faz um update na imagem do container.
+##### para isso, é necessário deletar o replicaset e criar novamente.
+# para atualizar a imagem do container em um replicaset existente, você pode usar o comando `kubectl set image`.
+# exemplo:
+# kubectl set image replicaset/nginx-replicaset nginx=nginx:1.19.0
+# para aplicar esse arquivo, use o comando:
+# kubectl apply -f licao1.yaml          

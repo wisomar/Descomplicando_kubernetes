@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment # Meu serviço com problemas de OOMKill
+metadata: # características do deployment
+  name: meu-servico
+  namespace: producao # namespace de produção
+spec: # especificações do deployment
+  replicas: 3 # número de réplicas
+  selector: # seleção de pods
+    matchLabels: # rótulos para correspondência
+      app: meu-servico
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template: # template do pod
+    metadata: # metadados do pod
+      labels:
+        app: meu-servico
+        version: "v2-problematica"
+    spec:
+      containers:
+      - name: meu-servico-container
+        image: linuxtips/memory-eater:0.2
+        # Simulando limites muito baixos para forçar OOMKill
+        resources:
+          limits:
+            memory: "32Mi"
+        # Sem probes = Kubernetes operando às cegas
+
+### os problemas desse yaml sao os requests e limits inadequados que podem causar OOMKill
+
+### falta :
+#requests de memoria e cpu para garantir que o pod tenha memoria suficiente para operar
+        #requests:
+        #  memory: "64Mi"
+        #  cpu: "100m"

@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: memory-eater-probes
+  labels:
+    app: memory-eater
+spec:
+  containers:
+  - name: memory-eater
+    image: linuxtips/memory-eater:0.3
+    ports:
+    - containerPort: 8080
+      name: health
+    env:
+    - name: MEMORY_MB
+      value: "100"
+    - name: WORKERS
+      value: "1"
+    - name: READY_DELAY
+      value: "10" # Demora 10s para ficar ready (útil para demonstrar)
+    - name: STARTUP_DELAY
+      value: "5"  # Demora 5s para iniciar
+    resources:
+      requests:
+        memory: "64Mi"
+        cpu: "100m"
+      limits:
+        memory: "200Mi"
+        cpu: "500m"
+
+    # Startup Probe - Verifica se a aplicação iniciou
+    # Falha até STARTUP_DELAY segundos
+    startupProbe:
+      httpGet:
+        path: /startupz
+        port: 8080
+      initialDelaySeconds: 2
+      periodSeconds: 3
+      failureThreshold: 10
+
+    # Liveness Probe - Verifica se está viva
+    livenessProbe:
+      httpGet:
+        path: /livez
+        port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 3
+
+    # Readiness Probe - Verifica se pode receber requisição
+    readinessProbe:
+      httpGet:
+        path: /readyz
+        port: 8080
+      initialDelaySeconds: 5
+      periodSeconds: 5
+      failureThreshold: 3
+      successThreshold: 1
+
+  restartPolicy: Always
